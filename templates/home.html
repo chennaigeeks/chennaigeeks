@@ -169,7 +169,7 @@
 		});
 
 		$('#searchform').submit(function(){
-			location.href = "http://makkarlabs.in/chennaigeeks/search?searchterm="+$('#searchterm').val();
+			location.href = $SCRIPT_ROOT+"search?searchterm="+$('#searchterm').val();
 			return false;
 		});
 
@@ -192,7 +192,7 @@
 		var months = {"1":"Jan","2":"Feb","3":"Mar","4":"Apr","5":"May","6":"Jun","7":"Jul","8":"Aug","9":"Sep","10":"Oct","11":"Nov","12":"Dec"};
 
 	    function plotGraph(year){
-	            $.getJSON("http://makkarlabs.in/chennaigeeks/api/postcount/yearly?year="+year, function(data){drawGraph(data.postcount);})
+	            $.getJSON($SCRIPT_ROOT+"/api/postcount/yearly?year="+year, function(data){drawGraph(data.postcount);})
 	        }
 	    function drawGraph(data){
 	        var barWidth = 30;

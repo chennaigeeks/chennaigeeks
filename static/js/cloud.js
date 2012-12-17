@@ -11,7 +11,7 @@ var words = [],
     tags,
     fontSize,
     maxLength = 30,
-    fetcher = "http://makkarlabs.in/chennaigeeks/api/tags",
+    fetcher = "http://chennaigeeks.in/api/tags",
     statusText = d3.select("#status");
 
 var layout = d3.layout.cloud()
@@ -66,7 +66,7 @@ d3.select(window)
 
 function loadCloud()
 {
-	url = "http://makkarlabs.in/chennaigeeks/api/tags";
+	url = "http://chennaigeeks.in/api/tags";
 	d3.text(url, function(text){data = text; parseHTML(data);});
 }
 
@@ -131,7 +131,7 @@ function draw(data, bounds) {
       .attr("transform", function(d) { return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")"; })
       .style("font-size", function(d) { return d.size + "px"; })
       .on("click", function(d) {
-           location.href = "http://makkarlabs.in/chennaigeeks/search?searchterm="+d.text;
+           location.href = "http://chennaigeeks.in/search?searchterm="+d.text;
       })
       .style("opacity", 1e-6)
     .transition()

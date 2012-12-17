@@ -106,7 +106,7 @@
 		}
 		$("form").submit(function(){
                         getResults();
-			window.history.pushState("", $("#searchterm").val(), "/chennaigeeks/search?searchterm="+$("#searchterm").val());
+			window.history.pushState("", $("#searchterm").val(), "/search?searchterm="+$("#searchterm").val());
        			return false;
 	         });
 		function getURLParameter(name) {

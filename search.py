@@ -15,9 +15,6 @@ def index():
 def search(page = 1):
     try:
         if len(request.args) > 0 and request.args['searchterm'] != None and request.args['searchterm'] != '': 
-            #searchterm = request.args['searchterm']
-	    #results = get_search_results(searchterm, page-1)
-            #return render_template('searchform.html',matches=results["matches"])
 	    return render_search_template()
         else:
            return render_search_template() 
