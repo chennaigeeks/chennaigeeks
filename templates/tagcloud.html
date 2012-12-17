@@ -1,0 +1,45 @@
+<html>
+<head>
+
+<style>
+	#vis text:hover { opacity: .7 !important; }
+	a.active { text-decoration: none; color: #000; font-weight: bold; cursor: text; }
+	#vis text { cursor: pointer; }
+</style>
+<script src="{{url_for('static', filename='js/d3/d3.v2.min.js')}}"></script>
+<script src="{{url_for('static', filename='js/d3/d3.layout.cloud.js')}}"></script>
+<script src="{{url_for('static', filename='js/cloud.js')}}"></script>
+<script src="{{url_for('static', filename='js/jquery.js')}}"></script>
+<script src="{{url_for('static', filename='js/doT.min.js')}}"></script>
+<script src="{{url_for('static', filename='js/results_tmpl.js')}}"></script>
+
+<link rel="stylesheet" href="{{url_for('static', filename='bootstrap/css/bootstrap.css')}}"/>
+
+
+</head>
+
+<body>
+
+
+<div id="popular-posts">
+
+</div>
+
+<script type="text/javascript">
+
+$SCRIPT_ROOT = "http://makkarlabs.in/chennaigeeks";
+
+function getPosts(time, type, year, month){
+	$.getJSON($SCRIPT_ROOT+"/api/popular/"+time+"?type="+type+"&year="+year+"&month="+month,function(data){
+			$("#popular-posts").append(popular_post_tmpl(data));
+		});
+}
+
+$(function(){
+	getPosts("","likes","2012","11");
+});
+
+</script>
+
+</body>
+</html>

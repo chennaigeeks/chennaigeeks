@@ -1,0 +1,124 @@
+{% extends "layout.html" %}
+{% block class_search %}active{% endblock %}
+
+{% block body %}
+
+<link href="{{url_for('static', filename='css/main.css')}}" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}" media="screen"/>
+<style>
+	#results{padding-top:20px; padding-bottom:20px;}
+	input{ height: 20px;}
+</style>
+
+<title>Search Chennai Geeks</title>
+<div>
+  <form class="form-search">
+  	<input type="text" id="searchterm" name="searchterm" class="input-xlarge search-query">
+	<button type="submit" class="btn">Submit</button>
+  </form>
+  <div class="page"></div>
+  <div id="results"></div>
+  <div class="page"></div>
+</div>
+
+<script type=text/javascript>
+  $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+</script>
+<script type=text/javascript src="{{
+  url_for('static', filename='js/jquery.js') }}"></script>
+<script type=text/javascript src="{{
+  url_for('static', filename='js/jquery.paginate.js') }}"></script>
+<script type=text/javascript src="{{
+  url_for('static', filename='js/doT.min.js') }}"></script>
+<script type=text/javascript src="{{
+  url_for('static', filename='js/results_tmpl.js') }}">
+</script>
+
+<script type="text/javascript">
+
+	var current_page = 1;
+	function getCurPage()
+        {
+              return current_page;
+        }
+
+	$(function() {
+		$('.page').hide();
+		function handleLinks(){
+			$('.show_links').each(function(){
+				$(this).click(function(e){
+					e.preventDefault();
+					var post_id = $(this).attr('postid');
+					$.getJSON($SCRIPT_ROOT + '/api/links/'+post_id, {
+                        		}, function(data){
+                                		$('#links_'+post_id).html(links_tmpl(data));
+                                	});
+                                	$('#links_'+post_id).toggle();
+				});
+			});
+		}
+		function getResults()
+		{
+			$('#page').hide();
+			$.getJSON($SCRIPT_ROOT + '/api/search', {
+                                searchterm : $('#searchterm').val()
+                        }, function(data){
+				if(data.result.matches.length === 0)
+				{
+					$('#results').html("<p>No results found :(</p>");
+					$('#page').hide();
+				}
+				else
+				{
+                                  		$('#results').html(results_tmpl(data));
+                        			pageCount = Math.ceil(data.result.total/20);
+					$('.page').show();
+					paginateThis(pageCount);
+					handleLinks();
+				}
+			});
+		}
+		function getPageResults()
+		{
+			$.getJSON($SCRIPT_ROOT + '/api/search/'+getCurPage(), {
+                                searchterm : $('#searchterm').val()
+                        }, function(data){
+                                $('#results').html(results_tmpl(data));
+				handleLinks();
+                        });
+		}
+		function paginateThis(pageCount){
+		 $(".page").paginate({
+                                        count : pageCount,
+                                        start : 1,
+                                        display : 8,
+                                        border : true,
+                                        border_color : '#fff',
+                                        text_color : '#fff',
+                                        background_color : 'black',
+                                        border_hover_color : '#ccc',
+                                        text_hover_color : '#000',
+                                        background_hover_color : '#fff',
+                                        images : false,
+                                        mouse : 'press',
+                                        onChange: function(page){current_page = +page; getPageResults();}
+                                });
+		}
+		$("form").submit(function(){
+                        getResults();
+			window.history.pushState("", $("#searchterm").val(), "/chennaigeeks/search?searchterm="+$("#searchterm").val());
+       			return false;
+	         });
+		function getURLParameter(name) {
+ 		   return decodeURI(
+		        (RegExp(name + '=' + '(.+?)(&|$)').exec(location.search)||[,null])[1]);
+		}
+	        if(getURLParameter('searchterm') != 'null'){
+			$('#searchterm').val(getURLParameter('searchterm'));
+			$('form').submit();
+		}
+	});
+</script>
+
+{% endblock %}
+

@@ -1,0 +1,6 @@
+<ul id="navigation">
+    {% for item in result %}
+        <div><p>{{item.attrs.message}}</p>
+	<p>{{item.attrs.author_name}}</p></div>
+    {% endfor %}
+</ul>

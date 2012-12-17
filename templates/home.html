@@ -1,0 +1,260 @@
+{% extends "layout.html" %}
+{% block class_home %}active{% endblock %}
+
+
+{% block body %}
+
+<link href="{{url_for('static', filename='css/jquery-ui.css')}}" rel="stylesheet" type="text/css" />
+<style>
+	#vis text:hover { opacity: .7 !important; }
+	a.active { text-decoration: none; color: #000; font-weight: bold; cursor: text; }
+	#vis text { cursor: pointer; }
+	#vis {padding-top:20px;}
+	#leaderboard, #popular-posts, #stats {height: 530px;} 
+	#stats {text-align: center;padding-top: 60px;}
+        #monthpicker{float:right;padding:5px;}
+        .ui-datepicker{width:225px !important;}
+        .form-search{margin:0px;}
+	#searchbar{width: 400px;text-align: center;margin-left: 35px;}
+	#bar-chart{height:250px;}
+	#total-count{}
+	select{height:31px;}	
+</style>
+
+<div class="row">
+	<div class="span7">
+		<div id="left-container" class="component well">
+		    <div id="tabs-outer">
+			<ul class="nav nav-tabs">
+				<li class="active"><a href="#popular-posts" data-toggle="tab">Popular Posts</a></li>
+				<li><a href="#stats" data-toggle="tab">Post Count</a></li>
+				<li><a href="#leaderboard" data-toggle="tab">Leaderboard</a></li>
+			</ul>
+			<div class="tab-content">
+				<div class="tab-pane active" id="popular-posts">
+					<div class="tabbable tabs-right" id="tabs-inner">
+  						<ul class="nav nav-tabs">
+  						  <li class="active"><a href="#alltime" data-toggle="tab">All time</a></li>
+    						  <li><a href="#monthly" data-toggle="tab">Monthly</a></li>
+  						</ul>
+					<div class="tab-content">
+  					  <div class="tab-pane active" id="alltime">						                          
+						<select class="input-medium" id="popularTypeA"><option value="likes">Likes</option><option value="comments">Comments</option></select>
+  						<div class="popular" id="popular_all"></div>
+  					  </div>
+  					<div class="tab-pane" id="monthly">
+                                            <div>
+						<select class="input-medium" id="popularTypeM"><option value="likes">Likes</option><option value="comments">Comments</option></select>
+						<input class="input-small" placeholder="mm/yyyy" id="monthpicker" data-start-year="2011" data-final-year="2012" data-selected-year="2012"/>
+					    </div>
+  					<div class="popular" id="popular_monthly"></div>
+  					</div>
+ 					</div>	
+				</div>
+			</div>
+
+				<div class="tab-pane" id="stats">
+				
+					Year: <input class="input-small" type="number" name="Year" min="2011" id="yearRange"/>
+					<div id="bar-chart"></div>
+					<div id="total-count"></div>
+				</div>
+				<div class="tab-pane" id="leaderboard">
+					<div class="tabbable tabs-right" id="tabs-inner">
+  						<ul class="nav nav-tabs">
+  						  <li class="active"><a href="#all" data-toggle="tab">All time</a></li>
+    		  				  <li><a href="#month" data-toggle="tab">Last month</a></li>
+  						</ul>
+
+  						<div class="tab-content">
+  						  <div class="tab-pane active" id="all">
+		  				    <div class="leaderboard" id="leaderboard_all"></div>
+  						  </div>
+  						  <div class="tab-pane" id="month">
+  						    <div class="leaderboard" id="leaderboard_month"></div>
+  						  </div>
+  						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	     </div>
+
+             <form id="form">
+
+  		<p id="status"></p>
+		<div hidden>
+		    <div id="presets" hidden></div>
+		    <p><label for="keyword">Keyword:</label>
+		      <input type="text" id="keyword" value="">
+		      <button id="go" type="submit">Generate Tag Cloud</button>
+		      <button id="search_tag" role="button">Search Chennai Geeks</button>
+		    <div id="custom-area">
+		      <p><textarea id="text" hidden></textarea>
+		    </div>
+		  </div>
+
+		<div hidden>
+		  <p><label for="max">Number of words:</label> <input type="number" value="100" min="1" id="max">
+		</div>
+
+		<div style="float: left" hidden>
+		  <p><label>Spiral:</label>
+		    <label for="archimedean"><input type="radio" name="spiral" id="archimedean" value="archimedean" checked="checked"> Archimedean</label>
+		  <p><label for="scale">Scale:</label>
+		    <label for="scale-log"><input type="radio" name="scale" id="scale-log" value="log" checked="checked"> log n</label>
+		  <p><label for="font">Font:</label> <input type="text" id="font" value="Impact">
+		</div>
+
+		<div id="angles" hidden>
+		  <p><input type="number" id="angle-count" value="5" min="1"> <label for="angle-count">orientations</label>
+		    <label for="angle-from">from</label> <input type="number" id="angle-from" value="-50" min="-90" max="90"> °
+		    <label for="angle-to">to</label> <input type="number" id="angle-to" value="50" min="-90" max="90"> °
+		</div>
+
+	     </form>
+
+	</div><!-- End span7-->
+
+	<div class="span4">
+		
+		<div class="well"  id="searchbar">
+			<form id="searchform" class="form-search">
+			  	<input type="text" id="searchterm" placeholder="Search Chennai Geeks" class="input-medium search-query">
+		  	  	<button type="submit" class="btn">Search</button>
+			</form>
+		</div>
+	
+	     <div id="vis"></div>
+	</div><!--End span4-->
+
+<div><!--End div row-->
+
+<script type=text/javascript src="{{url_for('static', filename='js/d3/d3.v2.min.js')}}"></script>
+<script type=text/javascript src="{{url_for('static', filename='js/d3/d3.layout.cloud.js')}}"></script>
+<script type=text/javascript src="{{url_for('static', filename='js/cloud.js')}}"></script>
+<script type=text/javascript src="{{url_for('static', filename='js/jquery.js')}}"></script>
+<script type=text/javascript src="{{url_for('static', filename='bootstrap/js/bootstrap.min.js')}}"></script>
+<script type=text/javascript>$SCRIPT_ROOT = {{ request.script_root|tojson|safe }};</script>
+<script type=text/javascript src="{{url_for('static', filename='js/doT.min.js') }}"></script>
+<script type=text/javascript src="{{url_for('static', filename='js/results_tmpl.js') }}"></script>
+<script type=text/javascript src="{{url_for('static', filename='js/jquery.mtz.monthpicker.js') }}"></script>
+
+<script type=text/javascript>
+	$(function() {
+
+	var selectedMonth, selectedYear=2012, popularTypeA="likes", popularTypeM="likes";
+	 	$("#monthpicker").monthpicker().bind('monthpicker-click-month', function (e, month){selectedMonth = month;  getPosts("#popular_monthly","monthly",popularTypeM,selectedYear,selectedMonth);
+}).bind('monthpicker-change-year', function (e, year) {
+    selectedYear = year; });
+
+	$("#popularTypeA").change(function(){popularTypeA= $(this).val();  getPosts("#popular_all","",popularTypeA,selectedYear,selectedMonth);
+ });
+	$("#popularTypeM").change(function(){popularTypeM= $(this).val();  getPosts("#popular_monthly","monthly",popularTypeM,selectedYear,selectedMonth);
+ });
+
+
+		$.getJSON($SCRIPT_ROOT + '/api/leaderboard/all', {
+                 }, function(data){
+                       $('#leaderboard_all').html(leaderboard_tmpl(data));
+		});
+		$.getJSON($SCRIPT_ROOT + '/api/leaderboard/month', {
+                 }, function(data){
+                       $('#leaderboard_month').html(leaderboard_tmpl(data));
+		});
+		
+		$.getJSON($SCRIPT_ROOT + '/api/postcount/all', {
+		}, function(data) {
+			$('#total-count').html("Total Posts :"+data.postcount[0].total);
+		});
+
+		$('#searchform').submit(function(){
+			location.href = "http://makkarlabs.in/chennaigeeks/search?searchterm="+$('#searchterm').val();
+			return false;
+		});
+
+		$('#yearRange').val(new Date().getFullYear());
+		$('#yearRange').attr('max',new Date().getFullYear());
+		$('#yearRange').change(function(){
+			$('#bar-chart').html('');
+	                plotGraph($('#yearRange').val());
+
+		});
+
+
+		function getPosts(id, time, type, year, month){
+			$.getJSON($SCRIPT_ROOT+"/api/popular/"+time+"?type="+type+"&year="+year+"&month="+month,function(data){
+				$(id).html(popular_post_tmpl(data));
+			});
+		}
+
+
+		var months = {"1":"Jan","2":"Feb","3":"Mar","4":"Apr","5":"May","6":"Jun","7":"Jul","8":"Aug","9":"Sep","10":"Oct","11":"Nov","12":"Dec"};
+
+	    function plotGraph(year){
+	            $.getJSON("http://makkarlabs.in/chennaigeeks/api/postcount/yearly?year="+year, function(data){drawGraph(data.postcount);})
+	        }
+	    function drawGraph(data){
+	        var barWidth = 30;
+	        var width = (barWidth + 10) * data.length;
+	        var height = 200;
+
+	        var x = d3.scale.linear().domain([0, data.length]).range([0, width]);
+	        var y = d3.scale.linear().domain([0, d3.max(data, function(datum) { return datum.posts; })]).
+	          rangeRound([0, height]);
+
+	       //Add canvas to DOM
+	       var barChart = d3.select("#bar-chart").
+	          append("svg:svg").
+	          attr("width", width).
+	          attr("height", height);
+
+	        barChart.selectAll("rect").
+	          data(data).
+	          enter().
+	          append("svg:rect").
+	          attr("x", function(datum, index) { return x(index); }).
+	          attr("y", function(datum) { return height - y(datum.posts); }).
+	          attr("height", function(datum) { return y(datum.posts); }).
+	          attr("width", barWidth).
+	          attr("fill", "#007FFF");
+
+	        barChart.selectAll("text").
+	          data(data).
+	          enter().
+	          append("svg:text").
+	          attr("x", function(datum, index) { return x(index) + barWidth; }).
+	          attr("y", function(datum) { return height - y(datum.posts); }).
+	          attr("dx", -barWidth/2).
+	          attr("dy", "1.2em").
+	          attr("text-anchor", "middle").
+	          text(function(datum) { return datum.posts;}).
+	          attr("fill", "white");
+
+	        $("#bar-chart > svg").attr("height", height+30)
+
+	        barChart.selectAll("text.yAxis").
+	          data(data).
+	          enter().append("svg:text").
+	          attr("x", function(datum, index) { return x(index) + barWidth; }).
+	          attr("y", height).
+	          attr("dx", -barWidth/2).
+	          attr("text-anchor", "middle").
+	          attr("style", "font-size: 12; font-family: Helvetica, sans-serif").
+	          text(function(datum) { return months[datum.month];}).
+	          attr("transform", "translate(0, 18)").
+	          attr("class", "yAxis");
+	    }
+	        plotGraph($('#yearRange').val());
+
+                getPosts("#popular_all","","likes","2012","1");
+
+	
+
+	});
+
+</script>
+
+    
+{% endblock %}
+
