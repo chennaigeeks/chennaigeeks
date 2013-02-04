@@ -1,6 +1,6 @@
 var fill = d3.scale.category20b();
 
-var w = 500,
+var w = 460,
     h = 320;
 
 var words = [],

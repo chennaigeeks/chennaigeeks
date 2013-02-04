@@ -9,5 +9,5 @@ app.logger.addHandler(filehandler)
 from chennaigeeks import search
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
 

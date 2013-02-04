@@ -3,46 +3,60 @@
 
 
 {% block body %}
-
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/jScrollPane.css') }}" media="screen"/>
 <link href="{{url_for('static', filename='css/jquery-ui.css')}}" rel="stylesheet" type="text/css" />
 <style>
 	#vis text:hover { opacity: .7 !important; }
 	a.active { text-decoration: none; color: #000; font-weight: bold; cursor: text; }
 	#vis text { cursor: pointer; }
 	#vis {padding-top:20px;}
-	#leaderboard, #popular-posts, #stats {height: 530px;} 
+	#leaderboard, #popular-posts, #stats {height: 580px;} 
 	#stats {text-align: center;padding-top: 60px;}
         #monthpicker{float:right;padding:5px;}
         .ui-datepicker{width:225px !important;}
         .form-search{margin:0px;}
-	#searchbar{width: 400px;text-align: center;margin-left: 35px;}
+	.icon{height:40px; width:40px;}
+	.bookmarks {height: 570px; padding-left: 5px;}
+	#social{float:right; margin-left:20px; width:130px; padding: 13px 8px;}
+	#searchbar{width: 260px;text-align: center;margin-left: 35px;}
+        #wordcloud{width: 443px;margin-left: 6px;padding-left:0px;}
 	#bar-chart{height:250px;}
 	#total-count{}
 	select{height:31px;}	
+	#blog_entries{width: 423px; margin-left: 6px;}
+	.well hr{margin:0px;}
+	#lean_overlay { position: fixed; z-index:100; top: 0px; left: 0px; height:100%; width:100%; background: #000; display: none;}
+        .modal_close { position: absolute; top: 12px; right: 12px; display: block; width: 14px; height: 14px; background: url("{{url_for('static',filename='images/modal_close.png')}}");
+z-index: 2; cursor: pointer; border-radius: 5px;}
+
+        .commentsModalWindow {display: none; overflow-y:auto; position: fixed; opacity: 1; z-index: 101; left: 50%; margin-left: -202px; top: 200px; width:500px; height: 600px;
+background: whitesmoke; border-radius: 10px; margin: 20px; padding: 20px;}
+
 </style>
 
 <div class="row">
 	<div class="span7">
 		<div id="left-container" class="component well">
 		    <div id="tabs-outer">
-			<ul class="nav nav-tabs">
+			<ul class="nav nav-pills" >
 				<li class="active"><a href="#popular-posts" data-toggle="tab">Popular Posts</a></li>
 				<li><a href="#stats" data-toggle="tab">Post Count</a></li>
 				<li><a href="#leaderboard" data-toggle="tab">Leaderboard</a></li>
+				<li><a href="#bookmarks-tab" data-toggle="tab">Bookmarks</a></li>
 			</ul>
 			<div class="tab-content">
 				<div class="tab-pane active" id="popular-posts">
 					<div class="tabbable tabs-right" id="tabs-inner">
   						<ul class="nav nav-tabs">
-  						  <li class="active"><a href="#alltime" data-toggle="tab">All time</a></li>
-    						  <li><a href="#monthly" data-toggle="tab">Monthly</a></li>
+  						  <li><a href="#alltime" data-toggle="tab">All time</a></li>
+    						  <li class="active"><a href="#monthly" data-toggle="tab">Monthly</a></li>
   						</ul>
 					<div class="tab-content">
-  					  <div class="tab-pane active" id="alltime">						                          
+  					  <div class="tab-pane" id="alltime">						                          
 						<select class="input-medium" id="popularTypeA"><option value="likes">Likes</option><option value="comments">Comments</option></select>
   						<div class="popular" id="popular_all"></div>
   					  </div>
-  					<div class="tab-pane" id="monthly">
+  					<div class="tab-pane active" id="monthly">
                                             <div>
 						<select class="input-medium" id="popularTypeM"><option value="likes">Likes</option><option value="comments">Comments</option></select>
 						<input class="input-small" placeholder="mm/yyyy" id="monthpicker" data-start-year="2011" data-final-year="2012" data-selected-year="2012"/>
@@ -62,43 +76,47 @@
 				<div class="tab-pane" id="leaderboard">
 					<div class="tabbable tabs-right" id="tabs-inner">
   						<ul class="nav nav-tabs">
-  						  <li class="active"><a href="#all" data-toggle="tab">All time</a></li>
-    		  				  <li><a href="#month" data-toggle="tab">Last month</a></li>
+  						  <li><a href="#all" data-toggle="tab">All time</a></li>
+    		  				  <li class="active"><a href="#month" data-toggle="tab">Last month</a></li>
   						</ul>
 
   						<div class="tab-content">
-  						  <div class="tab-pane active" id="all">
+  						  <div class="tab-pane" id="all">
 		  				    <div class="leaderboard" id="leaderboard_all"></div>
   						  </div>
-  						  <div class="tab-pane" id="month">
+  						  <div class="tab-pane active" id="month">
   						    <div class="leaderboard" id="leaderboard_month"></div>
   						  </div>
   						</div>
 					</div>
 				</div>
+				<div class="tab-pane" class="bookmarks" id="bookmarks-tab">
+					<div id="bookmarks"></div>
+					<p> View all bookmarks <a href="http://kippt.com/makkarlabs/chennaigeeks"> here</a></p>
+				</div>
 			</div>
 		</div>
 	     </div>
 
-             <form id="form">
+             <form id="form" style="display:none;">
 
   		<p id="status"></p>
-		<div hidden>
-		    <div id="presets" hidden></div>
+		<div hidden="true">
+		    <div id="presets" hidden="true"></div>
 		    <p><label for="keyword">Keyword:</label>
 		      <input type="text" id="keyword" value="">
 		      <button id="go" type="submit">Generate Tag Cloud</button>
 		      <button id="search_tag" role="button">Search Chennai Geeks</button>
 		    <div id="custom-area">
-		      <p><textarea id="text" hidden></textarea>
+		      <p><textarea id="text" hidden="true"></textarea>
 		    </div>
 		  </div>
 
-		<div hidden>
+		<div hidden="true">
 		  <p><label for="max">Number of words:</label> <input type="number" value="100" min="1" id="max">
 		</div>
 
-		<div style="float: left" hidden>
+		<div style="float: left" hidden="true">
 		  <p><label>Spiral:</label>
 		    <label for="archimedean"><input type="radio" name="spiral" id="archimedean" value="archimedean" checked="checked"> Archimedean</label>
 		  <p><label for="scale">Scale:</label>
@@ -106,7 +124,7 @@
 		  <p><label for="font">Font:</label> <input type="text" id="font" value="Impact">
 		</div>
 
-		<div id="angles" hidden>
+		<div id="angles" hidden="true">
 		  <p><input type="number" id="angle-count" value="5" min="1"> <label for="angle-count">orientations</label>
 		    <label for="angle-from">from</label> <input type="number" id="angle-from" value="-50" min="-90" max="90"> °
 		    <label for="angle-to">to</label> <input type="number" id="angle-to" value="50" min="-90" max="90"> °
@@ -116,16 +134,27 @@
 
 	</div><!-- End span7-->
 
-	<div class="span4">
-		
-		<div class="well"  id="searchbar">
-			<form id="searchform" class="form-search">
-			  	<input type="text" id="searchterm" placeholder="Search Chennai Geeks" class="input-medium search-query">
-		  	  	<button type="submit" class="btn">Search</button>
-			</form>
+	<div class="span5">
+		<div class="row">	
+			<div class="well span6"  id="searchbar">
+				<form id="searchform" class="form-search">
+					<input type="text" id="searchterm" placeholder="Search Chennai Geeks" class="input-medium search-query">
+					<button type="submit" class="btn">Search</button>
+				</form>
+			</div>
+			<div class="well span6" id="social">
+				<a href="http://facebook.com/groups/chennaigeeks"><img class="icon" src="{{url_for('static',filename='images/facebook-icon.png')}}"/></a>
+				<a href="http://twitter.com/geekmeetups"><img class="icon" src="{{url_for('static',filename='images/twitter-icon.png')}}"/></a>
+				<a href="https://groups.google.com/forum/#!forum/chennaigeeks"><img class="icon" src="{{url_for('static',filename='images/mail-icon.png')}}"/></a>
+			</div>
 		</div>
 	
-	     <div id="vis"></div>
+	        <div id="wordcloud" class="well">
+			<div id="vis"></div>
+		</div>
+		<div class="well" id="blog_entries">
+		</div>
+		
 	</div><!--End span4-->
 
 <div><!--End div row-->
@@ -139,11 +168,25 @@
 <script type=text/javascript src="{{url_for('static', filename='js/doT.min.js') }}"></script>
 <script type=text/javascript src="{{url_for('static', filename='js/results_tmpl.js') }}"></script>
 <script type=text/javascript src="{{url_for('static', filename='js/jquery.mtz.monthpicker.js') }}"></script>
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type=text/javascript src="{{url_for('static', filename='js/jquery.leanModal.min.js') }}"></script>
+<script type=text/javascript src="{{url_for('static', filename='js/comments.js') }}"></script>
+<script type=text/javascript src="{{
+  url_for('static', filename='js/jquery.mousewheel.js') }}"></script>
+<script type=text/javascript src="{{
+  url_for('static', filename='js/jquery.em.js') }}"></script>
+<script type=text/javascript src="{{
+  url_for('static', filename='js/jScrollPane.js') }}"></script>
 
 <script type=text/javascript>
 	$(function() {
 
-	var selectedMonth, selectedYear=2012, popularTypeA="likes", popularTypeM="likes";
+	var currentTime = new Date();
+	var month = currentTime.getMonth() +1;
+	var year = currentTime.getFullYear();
+		
+
+	var selectedMonth=month, selectedYear=year, popularTypeA="likes", popularTypeM="likes";
 	 	$("#monthpicker").monthpicker().bind('monthpicker-click-month', function (e, month){selectedMonth = month;  getPosts("#popular_monthly","monthly",popularTypeM,selectedYear,selectedMonth);
 }).bind('monthpicker-change-year', function (e, year) {
     selectedYear = year; });
@@ -180,11 +223,20 @@
 	                plotGraph($('#yearRange').val());
 
 		});
+		function getBookmarks(){
+			$.getJSON($SCRIPT_ROOT+"/api/links/",function(data){
+			$("#bookmarks").html(bookmarks_tmpl(data));
+		});
+		}
+
+
 
 
 		function getPosts(id, time, type, year, month){
 			$.getJSON($SCRIPT_ROOT+"/api/popular/"+time+"?type="+type+"&year="+year+"&month="+month,function(data){
 				$(id).html(popular_post_tmpl(data));
+				$("a[rel*=leanModal]").leanModal({ top : 100, overlay : 0.4, closeButton: ".modal_close" });
+				handleComments();
 			});
 		}
 
@@ -247,10 +299,31 @@
 	    }
 	        plotGraph($('#yearRange').val());
 
-                getPosts("#popular_all","","likes","2012","1");
 
-	
+		//Feed API code
 
+		function postFeedLoaded(result){
+			var entries = result.feed.entries.slice(0,3);
+			var feed = {};
+			feed.entries = entries;
+			$("#blog_entries").html(entries_tmpl(entries));
+		}
+		function OnLoad()
+		{
+			var postFeed = new google.feeds.Feed("http://chennaigeeks.in/blog/rss/");
+	                 postFeed.load(postFeedLoaded);
+
+		}
+		function loadFeeds()
+		{
+			google.load("feeds", "1", {"callback" : OnLoad});
+		}
+		google.setOnLoadCallback(loadFeeds);
+		
+                getPosts("#popular_monthly","monthly","likes",year,month);
+		$("#monthpicker").val(month+"/"+year)
+                getPosts("#popular_all","","likes",year,"1");	
+		getBookmarks();
 	});
 
 </script>

@@ -9,6 +9,10 @@ from flask import Flask, jsonify, render_template, request, redirect, url_for
 def index():
     return redirect(url_for('home'))
 
+@app.route('/about')
+def about():
+    return render_template('about.html')
+ 
 @app.route('/search')
 @app.route('/search/')
 @app.route('/search/<int:page>', methods=['GET'])
@@ -39,6 +43,7 @@ def get_search_results(searchterm, page):
     client = sphinxapi.SphinxClient()
     client.SetServer('localhost',21171)
     client.SetLimits(page*20, 20)
+    client.SetSortMode(sphinxapi.SPH_SORT_TIME_SEGMENTS, "created")
     return client.Query(searchterm)
 
 def process_search_results(results):
@@ -48,8 +53,9 @@ def process_search_results(results):
 def render_search_template():
     return render_template('searchform.html')
 
+@app.route('/api/links/')
 @app.route('/api/links/<post_id>')
-def get_related_links(post_id): 
+def get_related_links(post_id = 'recent'): 
     conf = ConfigParser.ConfigParser()
     try:
         conf.read('prop.cfg')
@@ -58,7 +64,10 @@ def get_related_links(post_id):
         return
     db = MySQLdb.connect(user='ssngeek_cg', passwd='f4ec028b', db='ssngeek_cg')
     cursor = db.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT url, title from links where post_id='"+post_id+"'")
+    if post_id == 'recent':
+        cursor.execute("select t2.title, t2.url from links as t2 INNER JOIN posts as t1 on t1.id = t2.post_id order by t1.created_time desc limit 20")
+    else:
+        cursor.execute("SELECT url, title from links where post_id='"+post_id+"'")
     links = cursor.fetchall()
     db.close()
     return jsonify(links = links)
@@ -156,3 +165,18 @@ def get_popular_posts(time = 'all'):
 @app.route('/home')
 def home():
     return render_template('home.html')
+
+@app.route('/permalink/<post_id>/')
+@app.route('/permalink/<post_id>')
+def permalink(post_id):
+    return render_template('permalink.html', post_id = post_id)
+
+@app.route('/wikitree')
+def gen_wikitree():
+    try:
+        treestring = request.args["treestring"]
+        return render_template('wikitree.html', treestring = treestring)
+    except KeyError:
+        abort(403)
+    except:
+        abort(401)

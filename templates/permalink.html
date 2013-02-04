@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+<style>
+#post_outer{width:1170px;}
+</style>
+<div id="fullpost"></div>
+
+<script type=text/javascript>
+  $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+</script>
+<script type=text/javascript src="{{
+  url_for('static', filename='js/jquery.js') }}"></script>
+<script type=text/javascript src="{{
+  url_for('static', filename='js/doT.min.js') }}"></script>
+<script type=text/javascript src="{{
+  url_for('static', filename='js/results_tmpl.js') }}"></script>
+<script type=text/javascript src="{{
+  url_for('static', filename='js/comments.js') }}"></script>
+
+<script type="text/javascript">
+
+	var post_id = {{post_id}};
+	$(function() {
+		$.getJSON('https://graph.facebook.com/'+post_id+'?format=json&callback=?', {
+                        access_token: '143111822497501%7C7QGy_pxMyF1_dUzT75Jv6udDyjk',
+                }).done( function(data){
+                	if(data.comments.count > 0){
+                        	$.getJSON('https://graph.facebook.com/'+post_id+'/comments?format=json&callback=?', {
+                                	access_token: '143111822497501%7C7QGy_pxMyF1_dUzT75Jv6udDyjk',
+                                        limit: 200
+                                }, function(comments_data){
+                                	$.each(comments_data.data, function(index, value){value.message = prototype.string.autolink(value.message);});
+                                        data.comments.data = comments_data.data;
+                                        $('#fullpost').html(comments_tmpl(data));
+				});
+                        }
+			else if(data.comments.count === 0){
+				$('#fullpost').html(comments_tmpl(data));
+			}
+                }).fail(function(){
+			$('#fullpost').html('<h3>No post found :(</h3>');
+		});
+
+	});
+</script>
+
+{% endblock %}
+
