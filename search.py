@@ -2,7 +2,7 @@ import sphinxapi
 import json
 import MySQLdb
 import ConfigParser
-from chennaigeeks import app, db
+from chennaigeeks import app
 from flask import Flask, jsonify, render_template, request, redirect, url_for
 
 @app.route('/', methods=['GET','POST'])
@@ -62,14 +62,13 @@ def get_related_links(post_id = 'recent'):
     except:
         app.logger.error( 'Config file'+str(config_filename)+' cannot be read')
         return
-    #db = MySQLdb.connect(user='ssngeek_cg', passwd='f4ec028b', db='ssngeek_cg')
-    cursor = db.cursor(MySQLdb.cursors.DictCursor)
+    db = MySQLdb.connect(user=config.DB_USERNAME, passwd=config.DB_PASSWORD, db=config.DB_NAME)
     if post_id == 'recent':
         cursor.execute("select t2.title, t2.url from links as t2 INNER JOIN posts as t1 on t1.id = t2.post_id order by t1.created_time desc limit 20")
     else:
         cursor.execute("SELECT url, title from links where post_id='"+post_id+"'")
     links = cursor.fetchall()
-    #db.close()
+    db.close()
     return jsonify(links = links)
 
 @app.route('/api/tags/')
@@ -94,14 +93,14 @@ def get_leaderboard(time = 'all'):
     except:
         app.logger.error( 'Config file'+str(config_filename)+' cannot be read')
         return
-    #db = MySQLdb.connect(user='ssngeek_cg', passwd='f4ec028b', db='ssngeek_cg')
+    db = MySQLdb.connect(user=config.DB_USERNAME, passwd=config.DB_PASSWORD, db=config.DB_NAME)
     cursor = db.cursor(MySQLdb.cursors.DictCursor)
     if time == 'all':
         cursor.execute("select author_name, author_id, count(*) as posts from posts group by author_id order by posts desc limit 10;")
     elif time == 'month':
         cursor.execute("select author_name, author_id, count(*) as posts from (select * from posts where PERIOD_DIFF(EXTRACT(YEAR_MONTH FROM NOW()), EXTRACT(YEAR_MONTH FROM created_time)) = 1) as tmp group by author_id order by posts desc limit 10;")
     top  = cursor.fetchall()
-    #db.close()
+    db.close()
     return jsonify(leaderboard = top)
 
 @app.route('/api/postcount')
@@ -113,7 +112,7 @@ def get_post_count(time = 'all'):
     except:
         app.logger.error( 'Config file'+str(config_filename)+' cannot be read')
         return
-    #db = MySQLdb.connect(user='ssngeek_cg', passwd='f4ec028b', db='ssngeek_cg')
+    db = MySQLdb.connect(user=config.DB_USERNAME, passwd=config.DB_PASSWORD, db=config.DB_NAME)
     cursor = db.cursor(MySQLdb.cursors.DictCursor)
     try:
         if time == 'all':
@@ -126,7 +125,7 @@ def get_post_count(time = 'all'):
             year = request.args['year']
             cursor.execute("select month(created_time) as month,count(*) as posts from posts where month(created_time) = (select distinct(month(created_time))) and year(created_time)='"+year+"' group by month(created_time)")
 	count  = cursor.fetchall()
-        #db.close()
+        db.close()
         return jsonify(postcount = count)
 
     except:
@@ -141,7 +140,7 @@ def get_popular_posts(time = 'all'):
     except:
         app.logger.error( 'Config file'+str(config_filename)+' cannot be read')
         return
-    #db = MySQLdb.connect(user='ssngeek_cg', passwd='f4ec028b', db='ssngeek_cg')
+    db = MySQLdb.connect(user=config.DB_USERNAME, passwd=config.DB_PASSWORD, db=config.DB_NAME)
     cursor = db.cursor(MySQLdb.cursors.DictCursor)
     try:
     	if time == 'all':
@@ -157,7 +156,7 @@ def get_popular_posts(time = 'all'):
             elif request.args['type'] == 'likes':
                 cursor.execute("select id, author_id, author_name, message, likes_count from posts where month(created_time)= '"+month+"' and year(created_time)='"+year+"' order by likes_count desc limit 10")
         posts = cursor.fetchall()
-        #db.close()
+        db.close()
         return jsonify(popular = posts)
     except:
         return jsonify(error = "improper arguments")
