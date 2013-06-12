@@ -1,9 +1,9 @@
 import sphinxapi
 import json
 import MySQLdb
-import ConfigParser
 from chennaigeeks import app
 from flask import Flask, jsonify, render_template, request, redirect, url_for
+import config
 
 @app.route('/', methods=['GET','POST'])
 def index():
@@ -56,13 +56,8 @@ def render_search_template():
 @app.route('/api/links/')
 @app.route('/api/links/<post_id>')
 def get_related_links(post_id = 'recent'): 
-    conf = ConfigParser.ConfigParser()
-    try:
-        conf.read('prop.cfg')
-    except:
-        app.logger.error( 'Config file'+str(config_filename)+' cannot be read')
-        return
     db = MySQLdb.connect(user=config.DB_USERNAME, passwd=config.DB_PASSWORD, db=config.DB_NAME)
+    cursor = db.cursor(MySQLdb.cursors.DictCursor)
     if post_id == 'recent':
         cursor.execute("select t2.title, t2.url from links as t2 INNER JOIN posts as t1 on t1.id = t2.post_id order by t1.created_time desc limit 20")
     else:
@@ -87,12 +82,6 @@ def render_tag_cloud():
 @app.route('/api/leaderboard')
 @app.route('/api/leaderboard/<time>')
 def get_leaderboard(time = 'all'):
-    conf = ConfigParser.ConfigParser()
-    try:
-        conf.read('prop.cfg')
-    except:
-        app.logger.error( 'Config file'+str(config_filename)+' cannot be read')
-        return
     db = MySQLdb.connect(user=config.DB_USERNAME, passwd=config.DB_PASSWORD, db=config.DB_NAME)
     cursor = db.cursor(MySQLdb.cursors.DictCursor)
     if time == 'all':
@@ -106,12 +95,6 @@ def get_leaderboard(time = 'all'):
 @app.route('/api/postcount')
 @app.route('/api/postcount/<time>')
 def get_post_count(time = 'all'):
-    conf = ConfigParser.ConfigParser()
-    try:
-        conf.read('prop.cfg')
-    except:
-        app.logger.error( 'Config file'+str(config_filename)+' cannot be read')
-        return
     db = MySQLdb.connect(user=config.DB_USERNAME, passwd=config.DB_PASSWORD, db=config.DB_NAME)
     cursor = db.cursor(MySQLdb.cursors.DictCursor)
     try:
@@ -134,12 +117,6 @@ def get_post_count(time = 'all'):
 @app.route('/api/popular/')
 @app.route('/api/popular/<time>')
 def get_popular_posts(time = 'all'):
-    conf = ConfigParser.ConfigParser()
-    try:
-        conf.read('prop.cfg')
-    except:
-        app.logger.error( 'Config file'+str(config_filename)+' cannot be read')
-        return
     db = MySQLdb.connect(user=config.DB_USERNAME, passwd=config.DB_PASSWORD, db=config.DB_NAME)
     cursor = db.cursor(MySQLdb.cursors.DictCursor)
     try:
